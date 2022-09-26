@@ -1,0 +1,140 @@
+﻿namespace SimpleECS.Tests;
+
+public class ArchetypeTests
+{
+    private readonly World world;
+
+    public ArchetypeTests()
+    {
+        world = World.Create(nameof(ArchetypeTests));
+    }
+
+    [Fact]
+    public void FromEntity_Valid()
+    {
+        var entity = world.CreateEntity(13);
+        Assert.True(entity);
+        var archetype = entity.archetype;
+        Assert.True(archetype.IsValid());
+    }
+
+    [Fact]
+    public void FromEntity_NotValid()
+    {
+        var entity = world.CreateEntity(13);
+        Assert.True(entity);
+        entity.Destroy();
+        Assert.False(entity);
+
+        var archetype = entity.archetype;
+        Assert.False(archetype.IsValid());
+    }
+
+    [Fact]
+    public void CreateEntity_Valid()
+    {
+        var entity = world.CreateEntity(13);
+        var archetype = entity.archetype;
+
+        var newEntity = archetype.CreateEntity();
+        Assert.True(newEntity.IsValid());
+        Assert.True(newEntity.Has<int>());
+        Assert.Equal(0, newEntity.Get<int>());
+    }
+
+    [Fact]
+    public void CreateEntity_NotValid()
+    {
+        var entity = world.CreateEntity(13);
+        Assert.True(entity);
+        entity.Destroy();
+        Assert.False(entity);
+
+        var archetype = entity.archetype;
+
+        var newEntity = archetype.CreateEntity();
+        Assert.False(newEntity.IsValid());
+    }
+
+    [Fact]
+    public void TryGetEntityBuffer_Valid()
+    {
+        var entity = world.CreateEntity(13);
+        var archetype = entity.archetype;
+
+        var newEntity = archetype.CreateEntity();
+
+        var didGetEntityBuffer = archetype.TryGetEntityBuffer(out Entity[] entity_buffer);
+        Assert.True(didGetEntityBuffer);
+        Assert.NotEmpty(entity_buffer);
+        Assert.Equal(entity, entity_buffer[0]);
+        Assert.Equal(newEntity, entity_buffer[1]);
+    }
+
+    [Fact]
+    public void TryGetEntityBuffer_NotValid()
+    {
+        var entity = world.CreateEntity(13);
+        entity.Destroy();
+        Assert.False(entity);
+        var archetype = entity.archetype;
+
+        var newEntity = archetype.CreateEntity();
+        Assert.False(newEntity);
+
+        var didGetEntityBuffer = archetype.TryGetEntityBuffer(out Entity[] entity_buffer);
+        Assert.False(didGetEntityBuffer);
+        Assert.Null(entity_buffer);
+    }
+
+    [Fact]
+    public void TryGetComponentBuffer_Valid()
+    {
+        var entity = world.CreateEntity(13);
+        var archetype = entity.archetype;
+
+        var newEntity = archetype.CreateEntity();
+
+        if (archetype.TryGetComponentBuffer(out int[] int_buffer))
+        {
+            for (int i = 0; i < archetype.EntityCount; ++i)
+                int_buffer[i]++;
+        }
+
+        Assert.Equal(14, entity.Get<int>());                 
+        Assert.Equal(1, newEntity.Get<int>());
+    }
+
+    [Fact]
+    public void TryGetComponentBuffer_NotValid()
+    {
+        var entity = world.CreateEntity(13);
+        entity.Destroy();
+        Assert.False(entity);
+        var archetype = entity.archetype;
+
+        var newEntity = archetype.CreateEntity();
+        Assert.False(newEntity);
+
+        var didGetComponentBuffer = archetype.TryGetComponentBuffer(out Entity[] componentBuffer);
+        Assert.False(didGetComponentBuffer);
+        Assert.Null(componentBuffer);
+    }
+
+    [Fact]
+    public void Destroy_Valid()
+    {
+        var entity = world.CreateEntity(13);
+        var archetype = entity.archetype;
+        var newEntity = archetype.CreateEntity();
+
+        Assert.True(entity);
+        Assert.True(newEntity);
+
+        archetype.Destroy();
+
+        Assert.False(archetype);
+        Assert.False(entity);
+        Assert.False(newEntity);
+    }
+}
