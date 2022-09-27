@@ -17,7 +17,7 @@ An Entity is simply an ID that associates a group of components together.
 To create an entity you first need to create a new world,
 then using that world create your entity with it's components as arguments.
 ```C#
-var world = World.Create("My World");    // naming the world is optional
+var world = new World("My World");    // naming the world is optional
 var entity = world.CreateEntity("my entity", 3, 5f);    
                                       // creates a new entity with components
                                       // components added this way will trigger
@@ -25,7 +25,7 @@ var entity = world.CreateEntity("my entity", 3, 5f);
                                       // setting the entity's string component
                                       // will change the entity's ToString() value
 
-world.Destroy();  // when your done with a world, destroy it to free up it's resourcess
+world.Dispose();  // when your done with a world, destroy it to free up it's resourcess
                   // This will automatically destroy all entities in that world
 ```
 Anything that can be put into a list can be a component.
@@ -68,9 +68,6 @@ entity.Remove<T>();   // removes the component on entity if found.
                     
 entity.Destroy();     // destroys the entity leaving it invalid
                       // all components on the entity will trigger their respective world.OnRemove() callbacks
-
-var newWorld = World.Create("new World");
-entity.Transfer(new_world);   // transfer moves entity to the specified world
 
 entity.GetAllComponents(); // returns a copy of all the components assigned to the entity
 
@@ -181,14 +178,13 @@ Some functions that cause structural changes are:
   * archetype.CreateEntity()
   * archetype.Destroy()
   * world.CreateEntity()
-  * world.Destroy()
   
 Entities created during query.Foreach() will be invalid during the function.
 However you can still set or remove components on that entity, 
 they will simply be applied when the Foreach function completes.
 
 ```C#
-var entity = world.Create("my entity", 3);
+var entity = world.CreateEntity("my entity", 3);
 entity.Remove<string>();
 entity.Has<string>();       // this will return false
 
@@ -240,8 +236,8 @@ entities within an archetype has the same component types by definition.
 if (!world.TryGetArchetype(out var archetype, typeof(int), typeof(float))) // gets an archetype with components
   return;                                                                  // returns false if world is invalid
 
-var entity = world.Create(3);
-var entity _archetype = entity.archetype;   // you can also get the archetype from valid entities
+var entity = world.CreateEntity(3);
+var entity_archetype = entity.archetype;   // you can also get the archetype from valid entities
                                             // if entity is invalid, the archtype will also be invalid
                                             // an entity's archetype changes when the component types it
                                             // holds changes
@@ -311,9 +307,7 @@ world.GetAllWorldDataTypes(); // returns all the types of GetAllWorldData()
 The world class is what manages all the underlying archetypes and their entities.
 
 ```C#
-World.GetAll();                         // returns a copy of all the currently valid worlds
-
-var world = World.Create("My World");   
+var world = new World("My World");   
 
 var count = world.EntityCount;          // returns how many entities are in the world
 
