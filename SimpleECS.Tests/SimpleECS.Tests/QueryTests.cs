@@ -5,9 +5,9 @@ public class QueryTests
     [Fact]
     public void Foreach_ComponentOnly()
     {
-        var world = World.Create(nameof(Foreach_ComponentOnly));
+        var world = new World(nameof(Foreach_ComponentOnly));
 
-        var matchingEntity = world.CreateEntity(1, 0.5f);
+        var matchingEntity = world.CreateEntity(1, 0.5f, (short)7);
         var nonMatchingEntity = world.CreateEntity(0, "not");
 
         var query = world.CreateQuery()
@@ -26,7 +26,7 @@ public class QueryTests
     [Fact]
     public void Foreach_EntityAndComponent()
     {
-        var world = World.Create(nameof(Foreach_EntityAndComponent));
+        var world = new World(nameof(Foreach_EntityAndComponent));
 
         var entity = world.CreateEntity("my entity", 3);
         entity.Remove<string>();
@@ -52,7 +52,7 @@ public class QueryTests
     [Fact]
     public void ManualIteration()
     {
-        var world = World.Create(nameof(ManualIteration));
+        var world = new World(nameof(ManualIteration));
 
         var entity = world.CreateEntity("my entity", 3);
 

@@ -2,16 +2,11 @@
 
 public class EntityTests
 {
-    private readonly World world;
-
-    public EntityTests()
-    {
-        world = World.Create(nameof(EntityTests));
-    }
 
     [Fact]
     public void Create_Valid()
     {
+        var world = new World();
         var entity = world.CreateEntity("my entity", 3, 5f);
 
         Assert.True(entity);
@@ -20,6 +15,7 @@ public class EntityTests
     [Fact]
     public void Destroy_NotValid()
     {
+        var world = new World();
         var entity = world.CreateEntity("temp entity", 1);
 
         Assert.True(entity);
@@ -31,6 +27,7 @@ public class EntityTests
     [Fact]
     public void Has_Missing()
     {
+        var world = new World();
         var entity = world.CreateEntity("temp entity", 1);
 
         Assert.False(entity.Has<bool>());
@@ -39,6 +36,7 @@ public class EntityTests
     [Fact]
     public void Has_Included()
     {
+        var world = new World();
         var entity = world.CreateEntity("temp entity", 1);
 
         Assert.True(entity.Has<int>());
@@ -47,6 +45,7 @@ public class EntityTests
     [Fact]
     public void Get_Check()
     {
+        var world = new World();
         var entity = world.CreateEntity(3);
         Assert.Equal(3, entity.Get<int>());
     }
@@ -54,6 +53,7 @@ public class EntityTests
     [Fact]
     public void Get_Reference()
     {
+        var world = new World();
         var entity = world.CreateEntity(3);
         Assert.Equal(3, entity.Get<int>());
 
@@ -67,6 +67,7 @@ public class EntityTests
     [Fact]
     public void Get_NoRef()
     {
+        var world = new World();
         var entity = world.CreateEntity(3);
         Assert.Equal(3, entity.Get<int>());
 
@@ -82,6 +83,8 @@ public class EntityTests
     [Fact]
     public void Set_New()
     {
+        var world = new World();
+
         var testString = "test string";
         var entity = world.CreateEntity(3);
         Assert.False(entity.Has<string>());
@@ -94,6 +97,8 @@ public class EntityTests
     [Fact]
     public void Remove()
     {
+        var world = new World();
+
         var entity = world.CreateEntity(3);
         Assert.True(entity.Has<int>());
 

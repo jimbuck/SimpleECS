@@ -2,49 +2,17 @@ namespace SimpleECS.Tests;
 
 public class WorldTests
 {
-    #region IsValid
-
-    [Fact]
-    public void IsValid_WorldConstructor_NotValid()
-    {
-        var world = new World();
-
-        Assert.False(world.IsValid());
-    }
-
-    [Fact]
-    public void IsValid_StaticCreate_Valid()
-    {
-        var world = World.Create(nameof(IsValid_StaticCreate_Valid));
-
-        Assert.True(world.IsValid());
-    }
-
-    [Fact]
-    public void IsValid_DestroyedWorld_NotValid()
-    {
-        var world = World.Create(nameof(IsValid_DestroyedWorld_NotValid));
-        Assert.True(world.IsValid());
-
-        world.Destroy();
-        Assert.False(world.IsValid());
-    }
-
-    #endregion
-
     #region Destroy
 
     [Fact]
     public void Destroy_Entities_NotValid()
     {
-        var world = World.Create(nameof(Destroy_Entities_NotValid));
-        Assert.True(world.IsValid());
+        var world = new World(nameof(Destroy_Entities_NotValid));
 
         var entity = world.CreateEntity("my entity", 3, 5f);
         Assert.True(entity.IsValid());
 
-        world.Destroy();
-        Assert.False(world.IsValid());
+        world.Dispose();
         Assert.False(entity.IsValid());
     }
 
@@ -55,47 +23,14 @@ public class WorldTests
     [Fact]
     public void Create_SameName_DifferentWorlds()
     {
-        var world1 = World.Create(nameof(Create_SameName_DifferentWorlds));
-        var world2 = World.Create(nameof(Create_SameName_DifferentWorlds));
+        var world1 = new World(nameof(Create_SameName_DifferentWorlds));
+        var world2 = new World(nameof(Create_SameName_DifferentWorlds));
 
-        Assert.NotEqual(world1, world2);
-    }
+        world1.CreateEntity(1);
 
-    [Fact]
-    public void GetOrCreate_SameName_ReturnsSameWorld()
-    {
-        var sharedName = nameof(GetOrCreate_SameName_ReturnsSameWorld);
-        var world1 = World.Create(sharedName);
-        var world2 = World.GetOrCreate(sharedName);
-
-        Assert.Equal(world1, world2);
-    }
-
-    [Fact]
-    public void GetOrCreate_DifferentName_ReturnsNewWorld()
-    {
-        var world1 = World.Create(nameof(GetOrCreate_DifferentName_ReturnsNewWorld) + "1");
-        var world2 = World.GetOrCreate(nameof(GetOrCreate_DifferentName_ReturnsNewWorld) + "2");
-
-        Assert.NotEqual(world1, world2);
-    }
-
-    #endregion
-
-    #region Name
-
-    [Fact]
-    public void Name_ChangeNameSameWorld()
-    {
-        var originalName = nameof(Name_ChangeNameSameWorld) + "Old";
-
-        var world1 = World.Create(originalName);
-        var world2 = World.GetOrCreate(originalName);
-
-        var updatedName = nameof(Name_ChangeNameSameWorld) + "New";
-        world1.Name = updatedName;
-
-        Assert.Equal(updatedName, world2.Name);
+        Assert.NotSame(world1, world2);
+        Assert.Equal(1, world1.EntityCount);
+        Assert.Equal(0, world2.EntityCount);
     }
 
     #endregion
@@ -105,7 +40,7 @@ public class WorldTests
     [Fact]
     public void WorldData_SetThenGet()
     {
-        var world = World.Create(nameof(WorldData_SetThenGet));
+        var world = new World(nameof(WorldData_SetThenGet));
         var str = "Test String";
         world.SetData(str);
         Assert.Equal(str, world.GetData<string>());
@@ -113,8 +48,8 @@ public class WorldTests
 
     [Fact]
     public void WorldData_InQuery()
-    {
-        var world = World.Create(nameof(WorldData_SetThenGet));
+    {      
+        var world = new World();
         var delta_time = 1f;
         world.SetData(delta_time);
 
@@ -133,7 +68,7 @@ public class WorldTests
     [Fact]
     public void WorldData_GetAllWorldData()
     {
-        var world = World.Create(nameof(WorldData_GetAllWorldData));
+        var world = new World(nameof(WorldData_GetAllWorldData));
         var name = "My Value";
         var count = 7;
         var delta_time = 0.123f;
@@ -151,7 +86,7 @@ public class WorldTests
     [Fact]
     public void WorldData_GetAllWorldDataTypes()
     {
-        var world = World.Create(nameof(WorldData_GetAllWorldDataTypes));
+        var world = new World(nameof(WorldData_GetAllWorldDataTypes));
         var name = "My Value";
         var count = 7;
         var delta_time = 0.123f;
@@ -173,7 +108,7 @@ public class WorldTests
     [Fact]
     public void OnSet_NewValueOnly()
     {
-        var world = World.Create(nameof(OnSet_NewValueOnly));
+        var world = new World(nameof(OnSet_NewValueOnly));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -194,7 +129,7 @@ public class WorldTests
     [Fact]
     public void OnSet_EntityAndNewValue()
     {
-        var world = World.Create(nameof(OnSet_EntityAndNewValue));
+        var world = new World(nameof(OnSet_EntityAndNewValue));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -216,7 +151,7 @@ public class WorldTests
     [Fact]
     public void OnSet_EntityNewAndOldValue()
     {
-        var world = World.Create(nameof(OnSet_EntityNewAndOldValue));
+        var world = new World(nameof(OnSet_EntityNewAndOldValue));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -239,7 +174,7 @@ public class WorldTests
     [Fact]
     public void OnSet_NamedCallback()
     {
-        var world = World.Create(nameof(OnSet_EntityAndNewValue));
+        var world = new World(nameof(OnSet_EntityAndNewValue));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -272,7 +207,7 @@ public class WorldTests
     [Fact]
     public void OnRemove_ValueOnly()
     {
-        var world = World.Create(nameof(OnRemove_ValueOnly));
+        var world = new World(nameof(OnRemove_ValueOnly));
         var oldValue = 2;
         var triggered = 0;
 
@@ -292,7 +227,7 @@ public class WorldTests
     [Fact]
     public void OnRemove_EntityAndValue()
     {
-        var world = World.Create(nameof(OnRemove_EntityAndValue));
+        var world = new World(nameof(OnRemove_EntityAndValue));
         var oldValue = 2;
         var triggered = 0;
 
@@ -313,7 +248,7 @@ public class WorldTests
     [Fact]
     public void OnRemove_NamedCallback()
     {
-        var world = World.Create(nameof(OnRemove_NamedCallback));
+        var world = new World(nameof(OnRemove_NamedCallback));
         var oldValue = 2;
         var triggered = 0;
 

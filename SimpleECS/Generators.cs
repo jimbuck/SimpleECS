@@ -6,6 +6,7 @@ namespace SimpleECS.Internal
     /// Generates the entity create and query foreach functions
     /// Use to increase the default limits
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public static class CodeGenerator
     {
         static string Pattern(string value, int count, bool comma_sep = true)
