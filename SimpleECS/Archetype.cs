@@ -30,7 +30,7 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// <summary>
     /// returns a copy of archetype's type signature
     /// </summary>
-    internal TypeSignature GetTypeSignature() => this.TryGetArchetypeInfo(out var archetype_Info) ? new TypeSignature(world.typeIds, archetype_Info.Signature) : new TypeSignature(world.typeIds);
+    internal TypeSignature GetTypeSignature() => this.TryGetArchetypeInfo(out var archetype_Info) ? new TypeSignature(world.TypeIds, archetype_Info.Signature) : new TypeSignature(world.TypeIds);
 
     /// <summary>
     /// returns a copy of component types in this archetype
@@ -144,7 +144,7 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
         {
             for(int i = 0; i < archetype_info.ComponentCount; ++ i)
             {
-                val += $" {world.typeIds.Get(archetype_info.ComponentBuffers[i].type_id).Name}";
+                val += $" {world.TypeIds.Get(archetype_info.ComponentBuffers[i].type_id).Name}";
             }
         }
         return val;
@@ -205,7 +205,7 @@ internal class Archetype_Info
         for (int i = 0; i < ComponentCount; ++i)
         {
             var type = signature.Types[i];
-            var type_id = world.typeIds.Get(type);
+            var type_id = world.TypeIds.Get(type);
             var index = type_id % ComponentBuffers.Length;
             ref var buffer_data = ref ComponentBuffers[index];
             if (buffer_data.type_id == 0)
@@ -220,7 +220,7 @@ internal class Archetype_Info
         for (int i = 0; i < ComponentCount; ++i)
         {
             var type = signature.Types[i];
-            var type_id = world.typeIds.Get(type);
+            var type_id = world.TypeIds.Get(type);
             if (ContainsType(type_id)) continue;
             var index = GetEmptyIndex(type_id % ComponentBuffers.Length);
             ref var buffer_data = ref ComponentBuffers[index];
@@ -311,7 +311,7 @@ internal class Archetype_Info
 
     public bool TryGetArray<Component>(out Component[] components)
     {
-        int type_id = World.typeIds.Get<Component>();
+        int type_id = World.TypeIds.Get<Component>();
         var data = ComponentBuffers[type_id % ComponentBuffers.Length];
         if (data.type_id == type_id)
         {
@@ -345,7 +345,7 @@ internal class Archetype_Info
     {
         Type[] components = new Type[ComponentCount];
         for (int i = 0; i < ComponentCount; ++i)
-            components[i] = World.typeIds.Get(ComponentBuffers[i].type_id);
+            components[i] = World.TypeIds.Get(ComponentBuffers[i].type_id);
         return components;
     }
 

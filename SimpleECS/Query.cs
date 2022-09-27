@@ -5,37 +5,37 @@ namespace SimpleECS;
 /// </summary>
 public partial class Query : IEnumerable<Archetype>
 {
-    private readonly TypeSignature include;
-    private readonly TypeSignature exclude;
+    private readonly TypeSignature _include;
+    private readonly TypeSignature _exclude;
 
-    private Archetype[] matching_archetypes = new Archetype[8];
-    private int last_lookup;
-    private int structure_update;
-    private int archetype_count;
+    private Archetype[] _matchingArchetypes = new Archetype[8];
+    private int _lastLookup;
+    private int _structureUpdate;
+    private int _archetypeCount;
 
-    private World world;
+    private World _world;
 
     /// <summary>
     /// the world the query operates on
     /// </summary>
     public World World
     {
-        get => world;
+        get => _world;
         set
         {
-            structure_update = -1;
-            world = value;
+            _structureUpdate = -1;
+            _world = value;
         }
     }
 
     internal Query(World world)
     {
-        this.world = world;
-        include = new(world.typeIds);
-        exclude = new(world.typeIds);
+        _world = world;
+        _include = new(world.TypeIds);
+        _exclude = new(world.TypeIds);
     }
            
-    public static implicit operator bool(Query query) => query == null ? false : query.world != null;
+    public static implicit operator bool(Query query) => query == null ? false : query._world != null;
 
     /// <summary>
     /// Returns a copy of all archetypes matching the query
@@ -43,8 +43,8 @@ public partial class Query : IEnumerable<Archetype>
     public Archetype[] GetArchetypes()
     {
         CheckQueryChanges();
-        Archetype[] archetypes = new Archetype[archetype_count];
-        for (int i = 0; i < archetype_count; ++i) archetypes[i] = matching_archetypes[i];
+        Archetype[] archetypes = new Archetype[_archetypeCount];
+        for (int i = 0; i < _archetypeCount; ++i) archetypes[i] = _matchingArchetypes[i];
         return archetypes;
     }
 
@@ -56,9 +56,9 @@ public partial class Query : IEnumerable<Archetype>
         CheckQueryChanges();
         Entity[] entities = new Entity[EntityCount];
         int count = 0;
-        for (int i = 0; i < archetype_count; ++i)
+        for (int i = 0; i < _archetypeCount; ++i)
         {
-            if (matching_archetypes[i].TryGetArchetypeInfo(out var arch_info))
+            if (_matchingArchetypes[i].TryGetArchetypeInfo(out var arch_info))
             {
                 for (int e = 0; e < arch_info.EntityCount; ++e)
                 {
@@ -75,9 +75,9 @@ public partial class Query : IEnumerable<Archetype>
     /// </summary>
     public Query Has<T>()
     {
-        archetype_count = 0;
-        structure_update = -1;
-        include.Add<T>();
+        _archetypeCount = 0;
+        _structureUpdate = -1;
+        _include.Add<T>();
         return this;
     }
 
@@ -87,9 +87,9 @@ public partial class Query : IEnumerable<Archetype>
     /// </summary>
     public Query Not<T>()
     {
-        archetype_count = 0;
-        structure_update = -1;
-        exclude.Add<T>();
+        _archetypeCount = 0;
+        _structureUpdate = -1;
+        _exclude.Add<T>();
         return this;
     }
 
@@ -98,9 +98,9 @@ public partial class Query : IEnumerable<Archetype>
     /// </summary>
     public Query Has(params Type[] types)
     {
-        archetype_count = 0;
-        structure_update = -1;
-        include.Add(types);
+        _archetypeCount = 0;
+        _structureUpdate = -1;
+        _include.Add(types);
         return this;
     }
 
@@ -109,9 +109,9 @@ public partial class Query : IEnumerable<Archetype>
     /// </summary>
     public Query Not(params Type[] types)
     {
-        archetype_count = 0;
-        structure_update = -1;
-        exclude.Add(types);
+        _archetypeCount = 0;
+        _structureUpdate = -1;
+        _exclude.Add(types);
         return this;
     }
 
@@ -142,10 +142,10 @@ public partial class Query : IEnumerable<Archetype>
     /// </summary>
     public Query Clear()
     {
-        include.Clear();
-        exclude.Clear();
-        archetype_count = 0;
-        structure_update = -1;
+        _include.Clear();
+        _exclude.Clear();
+        _archetypeCount = 0;
+        _structureUpdate = -1;
         return this;
     }
 
@@ -155,10 +155,10 @@ public partial class Query : IEnumerable<Archetype>
     public void Foreach(in Action<Entity> action)
     {
         CheckQueryChanges();
-        world.StructureEvents.EnqueueEvents++;
-        for (int archetype_index = 0; archetype_index < archetype_count; ++archetype_index)
+        _world.StructureEvents.EnqueueEvents++;
+        for (int archetype_index = 0; archetype_index < _archetypeCount; ++archetype_index)
         {
-            var archetype = world.Archetypes[matching_archetypes[archetype_index]].data;
+            var archetype = _world.Archetypes[_matchingArchetypes[archetype_index]].data;
             int count = archetype.EntityCount;
             var entities = archetype.Entities;
             if (count > 0)
@@ -167,7 +167,7 @@ public partial class Query : IEnumerable<Archetype>
                     action(entities[e]);
             }
         }
-        world.StructureEvents.EnqueueEvents--;
+        _world.StructureEvents.EnqueueEvents--;
     }
 
     /// <summary>
@@ -183,21 +183,21 @@ public partial class Query : IEnumerable<Archetype>
     // keeps the queried archtypes up to date, return false if the query is not valid
     private void CheckQueryChanges()
     {
-        if (world.ArchetypeStructureUpdateCount != structure_update)
+        if (_world.ArchetypeStructureUpdateCount != _structureUpdate)
         {
-            last_lookup = 0;
-            archetype_count = 0;
-            structure_update = world.ArchetypeStructureUpdateCount;
+            _lastLookup = 0;
+            _archetypeCount = 0;
+            _structureUpdate = _world.ArchetypeStructureUpdateCount;
         }
-        for (; last_lookup < world.ArchetypeTerminatingIndex; ++last_lookup)
+        for (; _lastLookup < _world.ArchetypeTerminatingIndex; ++_lastLookup)
         {
-            var arch = world.Archetypes[last_lookup].data;
+            var arch = _world.Archetypes[_lastLookup].data;
             if (arch == null) continue;
-            if (arch.Signature.HasAll(include) && !arch.Signature.HasAny(exclude))
+            if (arch.Signature.HasAll(_include) && !arch.Signature.HasAny(_exclude))
             {
-                if (archetype_count == matching_archetypes.Length) Array.Resize(ref matching_archetypes, archetype_count * 2);
-                matching_archetypes[archetype_count] = arch.Archetype;
-                ++archetype_count;
+                if (_archetypeCount == _matchingArchetypes.Length) Array.Resize(ref _matchingArchetypes, _archetypeCount * 2);
+                _matchingArchetypes[_archetypeCount] = arch.Archetype;
+                ++_archetypeCount;
             }
         }
     }
@@ -212,7 +212,7 @@ public partial class Query : IEnumerable<Archetype>
         {
             int count = 0;
             CheckQueryChanges();
-            for (int i = 0; i < archetype_count; ++i) count += world.Archetypes[matching_archetypes[i]].data.EntityCount;
+            for (int i = 0; i < _archetypeCount; ++i) count += _world.Archetypes[_matchingArchetypes[i]].data.EntityCount;
             return count;
         }
     }
@@ -220,36 +220,36 @@ public partial class Query : IEnumerable<Archetype>
     public override string ToString()
     {
         return "Query" +
-        (include.Count > 0 ? $" -> Has {include.TypesToString()}" : "") +
-        (exclude.Count > 0 ? $" -> Not {exclude.TypesToString()}" : "");
+        (_include.Count > 0 ? $" -> Has {_include.TypesToString()}" : "") +
+        (_exclude.Count > 0 ? $" -> Not {_exclude.TypesToString()}" : "");
     }
 
     /// <summary>
     /// returns all the types in the queries' has filter
     /// </summary>
-    public IReadOnlyList<Type> GetHasFilterTypes() => include.Types;
+    public IReadOnlyList<Type> GetHasFilterTypes() => _include.Types;
 
     /// <summary>
     /// returns all the types in the queries' not filter
     /// </summary>
-    public IReadOnlyList<Type> GetNotFilterTypes() => exclude.Types;
+    public IReadOnlyList<Type> GetNotFilterTypes() => _exclude.Types;
 
 
     IEnumerator<Archetype> IEnumerable<Archetype>.GetEnumerator()
     {
         CheckQueryChanges();
-        for (int i = 0; i < archetype_count; ++i)
+        for (int i = 0; i < _archetypeCount; ++i)
         {
-            yield return world.Archetypes[matching_archetypes[i]].data.Archetype;
+            yield return _world.Archetypes[_matchingArchetypes[i]].data.Archetype;
         }
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
         CheckQueryChanges();
-        for (int i = 0; i < archetype_count; ++i)
+        for (int i = 0; i < _archetypeCount; ++i)
         {
-            yield return world.Archetypes[matching_archetypes[i]].data.Archetype;
+            yield return _world.Archetypes[_matchingArchetypes[i]].data.Archetype;
         }
     }
 }

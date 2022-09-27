@@ -79,7 +79,7 @@ public struct Entity : IEquatable<Entity>
     {
         ref var info = ref World.Entities[index];
         if (info.version == version)
-            return info.ArchInfo.Has(World.typeIds.Get<Component>());
+            return info.ArchInfo.Has(World.TypeIds.Get<Component>());
         return false;
     }
 

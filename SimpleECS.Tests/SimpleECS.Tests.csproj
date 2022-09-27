@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\SimpleECS\SimpleECS.csproj" />
+    <ProjectReference Include="..\SimpleECS\SimpleECS.csproj" />
   </ItemGroup>
 
 </Project>

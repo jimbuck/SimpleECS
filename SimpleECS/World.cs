@@ -39,8 +39,8 @@ public partial class World : IEnumerable<Archetype>, IDisposable
     internal (Archetype_Info data, int version)[] Archetypes = new (Archetype_Info, int)[32];
     internal Dictionary<TypeSignature, int> SignatureToArchetypeIndex = new();
 
-    internal TypeIdentifier typeIds = new();
-    internal TypeSignature buffer_signature; // just a scratch signature so that I'm not making new ones all the time
+    internal TypeIdentifier TypeIds = new();
+    internal TypeSignature BufferSignature; // just a scratch signature so that I'm not making new ones all the time
 
     /// <summary>
     /// Handles all structural changes to the ecs world
@@ -57,7 +57,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
     public World(string name = null)
     {
         Name = name ?? $"World_{Guid.NewGuid().ToString().Replace("-", string.Empty)}";
-        buffer_signature = new(typeIds);
+        BufferSignature = new(TypeIds);
 
         // this is just to prevent default archetype from being valid
         Archetypes[0].version++;
@@ -145,7 +145,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
     /// </summary>
     public Entity CreateEntity()
     {
-        return StructureEvents.CreateEntity(GetArchetypeData(buffer_signature.Clear()));
+        return StructureEvents.CreateEntity(GetArchetypeData(BufferSignature.Clear()));
     }
 
     /// <summary>
@@ -167,13 +167,13 @@ public partial class World : IEnumerable<Archetype>, IDisposable
     /// Tries to get an archetype that has the supplied types.
     /// Returns false if the world is destroyed or null
     /// </summary>
-    public bool TryGetArchetype(out Archetype archetype, params Type[] types) => TryGetArchetype(out archetype, new TypeSignature(typeIds, types));
+    public bool TryGetArchetype(out Archetype archetype, params Type[] types) => TryGetArchetype(out archetype, new TypeSignature(TypeIds, types));
 
     /// <summary>
     /// Tries to get an archetype that has the supplied types.
     /// Returns false if the world is destroyed or null
     /// </summary>
-    public bool TryGetArchetype(out Archetype archetype, IEnumerable<Type> types) => TryGetArchetype(out archetype, new TypeSignature(typeIds, types));
+    public bool TryGetArchetype(out Archetype archetype, IEnumerable<Type> types) => TryGetArchetype(out archetype, new TypeSignature(TypeIds, types));
 
 
     internal Archetype_Info GetArchetypeData(TypeSignature signature)
@@ -192,7 +192,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
                 index = ArchetypeTerminatingIndex;
                 ArchetypeTerminatingIndex++;
             }
-            var sig = new TypeSignature(typeIds, signature);
+            var sig = new TypeSignature(TypeIds, signature);
             SignatureToArchetypeIndex[sig] = index;
             Archetypes[index].data = new Archetype_Info(this, sig, index, Archetypes[index].version);
         }
@@ -225,7 +225,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
 
     internal WorldData<T> GetWorldData<T>()
     {
-        int type_id = typeIds.Get<T>();
+        int type_id = TypeIds.Get<T>();
         if (type_id >= WorldData.Length)
         {
             var size = WorldData.Length;
@@ -247,7 +247,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
         }
         if (WorldData[type_id] == null)
         {
-            var type = typeIds.Get(type_id);
+            var type = TypeIds.Get(type_id);
             WorldData[type_id] = (WorldData)Activator.CreateInstance(typeof(WorldData<>).MakeGenericType(type));
         }
         return WorldData[type_id];
@@ -643,7 +643,7 @@ internal struct StructureEventHandler
         if (cache_events > 0)
         {
             world_data.set_queue.Enqueue(component);
-            events.Enqueue(new EventData { type = EventType.SetComponent, entity = entity, type_id = world.typeIds.Get<Component>() });
+            events.Enqueue(new EventData { type = EventType.SetComponent, entity = entity, type_id = world.TypeIds.Get<Component>() });
             return;
         }
 
@@ -666,7 +666,7 @@ internal struct StructureEventHandler
                 world.Entities[last.index].arch_index = old_index; // reassign moved entity to to index
 
                 // adding entity to target archetype
-                var target_archetype = entity_info.ArchInfo = world.GetArchetypeData(world.buffer_signature.Copy(archetype.Signature).Add<Component>());
+                var target_archetype = entity_info.ArchInfo = world.GetArchetypeData(world.BufferSignature.Copy(archetype.Signature).Add<Component>());
                 var target_index = entity_info.arch_index = target_archetype.EntityCount;
                 target_archetype.EnsureCapacity(target_index);
                 target_archetype.EntityCount++;
@@ -690,7 +690,7 @@ internal struct StructureEventHandler
 
     public void Remove<Component>(in Entity entity)
     {
-        int type_id = world.typeIds.Get<Component>();
+        int type_id = world.TypeIds.Get<Component>();
         if (cache_events > 0)
         {
             events.Enqueue(new EventData { type = EventType.RemoveComponent, entity = entity, type_id = type_id });
@@ -705,7 +705,7 @@ internal struct StructureEventHandler
                 {
                     var old_index = entity_info.arch_index;
 
-                    var target_arch = world.GetArchetypeData(world.buffer_signature.Copy(old_arch.Signature).Remove(type_id));
+                    var target_arch = world.GetArchetypeData(world.BufferSignature.Copy(old_arch.Signature).Remove(type_id));
                     var target_index = target_arch.EntityCount;
                     target_arch.EntityCount++;
                     target_arch.EnsureCapacity(target_index);
