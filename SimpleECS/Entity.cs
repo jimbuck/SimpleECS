@@ -5,62 +5,50 @@ namespace SimpleECS;
 /// </summary>
 public struct Entity : IEquatable<Entity>
 {
-    internal World World;
+    internal int WorldId;
 
-    internal Entity(int index, int version, World world)
+    /// <summary>
+    /// the combination of the index and version act as a unique identifier for the entity
+    /// </summary>
+    public readonly int Index;
+
+    /// <summary>
+    /// the combination of the index and version act as a unique identifier for the entity
+    /// </summary>
+    public readonly int Version;
+
+    internal Entity(int index, int version, int worldId)
     {
-        this.index = index; this.version = version;
-        World = world;
+        Index = index;
+        Version = version;
+        WorldId = worldId;
     }
-
-    ///// <summary>
-    ///// the world that the entity belongs to
-    ///// </summary>
-    //public World world
-    //{
-    //    get
-    //    {
-    //        ref var info = ref Entities.All[index];
-    //        if (info.version == version)
-    //            return info.world_info.world;
-    //        return default;
-    //    }
-    //}
 
     /// <summary>
     /// the archetype that the entity belongs to
     /// </summary>
-    public Archetype archetype
+    public Archetype Archetype
     {
         get
         {
-            ref var info = ref World.Entities[index];
-            if (info.version == version)
+            ref var info = ref World.All[WorldId].Entities[Index];
+            if (info.version == Version)
                 return info.ArchInfo.Archetype;
             return default;
         }
     }
 
-    /// <summary>
-    /// the combination of the index and version act as a unique identifier for the entity
-    /// </summary>
-    public readonly int index;
-
-    /// <summary>
-    /// the combination of the index and version act as a unique identifier for the entity
-    /// </summary>
-    public readonly int version;
+    
 
     /// <summary>
     /// returns entity's string value if set
     /// </summary>
     public override string ToString()
     {
-        string name;
-        TryGet<string>(out name);
-        if (String.IsNullOrEmpty(name))
+        TryGet(out string name);
+        if (string.IsNullOrEmpty(name))
             name = IsValid() ? "Entity" : "~Entity";
-        return $"{name} {index}.{version}";
+        return $"{name} {Index}.{Version}";
     }
 
     /// <summary>
@@ -68,8 +56,7 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public bool IsValid()
     {
-        if (World == null) return false;
-        return World.Entities[index].version == version;
+        return World.All[WorldId] != null && World.All[WorldId].Entities[Index].version == Version;
     }
 
     /// <summary>
@@ -77,9 +64,9 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public bool Has<Component>()
     {
-        ref var info = ref World.Entities[index];
-        if (info.version == version)
-            return info.ArchInfo.Has(World.TypeIds.Get<Component>());
+        ref var info = ref World.All[WorldId].Entities[Index];
+        if (info.version == Version)
+            return info.ArchInfo.Has(World.All[WorldId].TypeIds.Get<Component>());
         return false;
     }
 
@@ -90,7 +77,7 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public Entity Remove<Component>()
     {
-        World.Entities[index].world?.StructureEvents.Remove<Component>(this);
+        World.All[WorldId]?.StructureEvents.Remove<Component>(this);
         return this;
     }
 
@@ -102,7 +89,7 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public Entity Set<Component>(in Component component)
     {
-        World.Entities[index].world?.StructureEvents.Set(this, component);
+        World.All[WorldId]?.StructureEvents.Set(this, component);
         return this;
     }
 
@@ -111,8 +98,8 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public bool TryGet<Component>(out Component component)
     {
-        ref var info = ref World.Entities[index];
-        if (info.version == version)
+        ref var info = ref World.All[WorldId].Entities[Index];
+        if (info.version == Version)
         {
             if (info.ArchInfo.TryGetArray<Component>(out var buffer))
             {
@@ -130,8 +117,8 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public ref Component Get<Component>()
     {
-        ref var entity_info = ref World.Entities[index];
-        if (entity_info.version == version)
+        ref var entity_info = ref World.All[WorldId].Entities[Index];
+        if (entity_info.version == Version)
         {
             if (entity_info.ArchInfo.TryGetArray<Component>(out var buffer)) return ref buffer[entity_info.arch_index];
             throw new Exception($"{this} does not contain {typeof(Component).Name}");
@@ -145,18 +132,18 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public void Destroy()
     {
-        World.Entities[index].world?.StructureEvents.Destroy(this);
+        World.All[WorldId]?.StructureEvents.Destroy(this);
     }
 
-    bool IEquatable<Entity>.Equals(Entity other) => index == other.index && version == other.version;
+    bool IEquatable<Entity>.Equals(Entity other) => Index == other.Index && Version == other.Version;
 
     public override bool Equals(object obj) => obj is Entity e ? e == this : false;
 
-    public static bool operator ==(Entity a, Entity b) => a.index == b.index && a.version == b.version;
+    public static bool operator ==(Entity a, Entity b) => a.Index == b.Index && a.Version == b.Version;
 
     public static bool operator !=(Entity a, Entity b) => !(a == b);
 
-    public override int GetHashCode() => index;
+    public override int GetHashCode() => Index;
 
     public static implicit operator bool(Entity entity) => entity.IsValid();
 
@@ -165,9 +152,8 @@ public struct Entity : IEquatable<Entity>
     /// </summary>
     public int GetComponentCount()
     {
-        ref var info = ref World.Entities[index];
-        if (info.version == version)
-            return info.ArchInfo.ComponentCount;
+        ref var info = ref World.All[WorldId].Entities[Index];
+        if (info.version == Version) return info.ArchInfo.ComponentCount;
         return 0;
     }
 }

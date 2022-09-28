@@ -5,7 +5,7 @@ public class QueryTests
     [Fact]
     public void Foreach_ComponentOnly()
     {
-        var world = new World(nameof(Foreach_ComponentOnly));
+        using var world = new World(nameof(Foreach_ComponentOnly));
 
         var matchingEntity = world.CreateEntity(1, 0.5f, (short)7);
         var nonMatchingEntity = world.CreateEntity(0, "not");
@@ -26,7 +26,7 @@ public class QueryTests
     [Fact]
     public void Foreach_EntityAndComponent()
     {
-        var world = new World(nameof(Foreach_EntityAndComponent));
+        using var world = new World(nameof(Foreach_EntityAndComponent));
 
         var entity = world.CreateEntity("my entity", 3);
         entity.Remove<string>();
@@ -52,7 +52,7 @@ public class QueryTests
     [Fact]
     public void ManualIteration()
     {
-        var world = new World(nameof(ManualIteration));
+        using var world = new World(nameof(ManualIteration));
 
         var entity = world.CreateEntity("my entity", 3);
 
@@ -60,7 +60,7 @@ public class QueryTests
 
         foreach (var archetype in query)
         {
-            Assert.Equal(entity.archetype, archetype);
+            Assert.Equal(entity.Archetype, archetype);
             Assert.Equal(1, archetype.EntityCount);
 
             var didGetEntityBuffer = archetype.TryGetEntityBuffer(out Entity[] entity_buffer);

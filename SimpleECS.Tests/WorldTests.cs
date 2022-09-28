@@ -23,8 +23,8 @@ public class WorldTests
     [Fact]
     public void Create_SameName_DifferentWorlds()
     {
-        var world1 = new World(nameof(Create_SameName_DifferentWorlds));
-        var world2 = new World(nameof(Create_SameName_DifferentWorlds));
+        using var world1 = new World(nameof(Create_SameName_DifferentWorlds));
+        using var world2 = new World(nameof(Create_SameName_DifferentWorlds));
 
         world1.CreateEntity(1);
 
@@ -40,7 +40,7 @@ public class WorldTests
     [Fact]
     public void WorldData_SetThenGet()
     {
-        var world = new World(nameof(WorldData_SetThenGet));
+        using var world = new World(nameof(WorldData_SetThenGet));
         var str = "Test String";
         world.SetData(str);
         Assert.Equal(str, world.GetData<string>());
@@ -48,8 +48,8 @@ public class WorldTests
 
     [Fact]
     public void WorldData_InQuery()
-    {      
-        var world = new World();
+    {
+        using var world = new World();
         var delta_time = 1f;
         world.SetData(delta_time);
 
@@ -68,7 +68,7 @@ public class WorldTests
     [Fact]
     public void WorldData_GetAllWorldData()
     {
-        var world = new World(nameof(WorldData_GetAllWorldData));
+        using var world = new World(nameof(WorldData_GetAllWorldData));
         var name = "My Value";
         var count = 7;
         var delta_time = 0.123f;
@@ -86,7 +86,7 @@ public class WorldTests
     [Fact]
     public void WorldData_GetAllWorldDataTypes()
     {
-        var world = new World(nameof(WorldData_GetAllWorldDataTypes));
+        using var world = new World(nameof(WorldData_GetAllWorldDataTypes));
         var name = "My Value";
         var count = 7;
         var delta_time = 0.123f;
@@ -108,7 +108,7 @@ public class WorldTests
     [Fact]
     public void OnSet_NewValueOnly()
     {
-        var world = new World(nameof(OnSet_NewValueOnly));
+        using var world = new World(nameof(OnSet_NewValueOnly));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -129,7 +129,7 @@ public class WorldTests
     [Fact]
     public void OnSet_EntityAndNewValue()
     {
-        var world = new World(nameof(OnSet_EntityAndNewValue));
+        using var world = new World(nameof(OnSet_EntityAndNewValue));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -151,7 +151,7 @@ public class WorldTests
     [Fact]
     public void OnSet_EntityNewAndOldValue()
     {
-        var world = new World(nameof(OnSet_EntityNewAndOldValue));
+        using var world = new World(nameof(OnSet_EntityNewAndOldValue));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -174,7 +174,7 @@ public class WorldTests
     [Fact]
     public void OnSet_NamedCallback()
     {
-        var world = new World(nameof(OnSet_EntityAndNewValue));
+        using var world = new World(nameof(OnSet_EntityAndNewValue));
         var oldValue = 2;
         var newValue = 4;
         var triggered = 0;
@@ -207,7 +207,7 @@ public class WorldTests
     [Fact]
     public void OnRemove_ValueOnly()
     {
-        var world = new World(nameof(OnRemove_ValueOnly));
+        using var world = new World(nameof(OnRemove_ValueOnly));
         var oldValue = 2;
         var triggered = 0;
 
@@ -227,7 +227,7 @@ public class WorldTests
     [Fact]
     public void OnRemove_EntityAndValue()
     {
-        var world = new World(nameof(OnRemove_EntityAndValue));
+        using var world = new World(nameof(OnRemove_EntityAndValue));
         var oldValue = 2;
         var triggered = 0;
 
@@ -248,7 +248,7 @@ public class WorldTests
     [Fact]
     public void OnRemove_NamedCallback()
     {
-        var world = new World(nameof(OnRemove_NamedCallback));
+        using var world = new World(nameof(OnRemove_NamedCallback));
         var oldValue = 2;
         var triggered = 0;
 

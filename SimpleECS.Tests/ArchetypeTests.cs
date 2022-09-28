@@ -8,7 +8,7 @@ public class ArchetypeTests
         var world = new World();
         var entity = world.CreateEntity(13);
         Assert.True(entity);
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
         Assert.True(archetype.IsValid());
     }
 
@@ -21,16 +21,16 @@ public class ArchetypeTests
         entity.Destroy();
         Assert.False(entity);
 
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
         Assert.False(archetype.IsValid());
     }
 
     [Fact]
     public void CreateEntity_Valid()
     {
-        var world = new World();
+        using var world = new World();
         var entity = world.CreateEntity(13);
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
 
         var newEntity = archetype.CreateEntity();
         Assert.True(newEntity.IsValid());
@@ -41,13 +41,13 @@ public class ArchetypeTests
     [Fact]
     public void CreateEntity_NotValid()
     {
-        var world = new World();
+        using var world = new World();
         var entity = world.CreateEntity(13);
         Assert.True(entity);
         entity.Destroy();
         Assert.False(entity);
 
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
 
         var newEntity = archetype.CreateEntity();
         Assert.False(newEntity.IsValid());
@@ -56,9 +56,9 @@ public class ArchetypeTests
     [Fact]
     public void TryGetEntityBuffer_Valid()
     {
-        var world = new World();
+        using var world = new World();
         var entity = world.CreateEntity(13);
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
 
         var newEntity = archetype.CreateEntity();
 
@@ -72,11 +72,11 @@ public class ArchetypeTests
     [Fact]
     public void TryGetEntityBuffer_NotValid()
     {
-        var world = new World();
+        using var world = new World();
         var entity = world.CreateEntity(13);
         entity.Destroy();
         Assert.False(entity);
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
 
         var newEntity = archetype.CreateEntity();
         Assert.False(newEntity);
@@ -89,9 +89,9 @@ public class ArchetypeTests
     [Fact]
     public void TryGetComponentBuffer_Valid()
     {
-        var world = new World();
+        using var world = new World();
         var entity = world.CreateEntity(13);
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
 
         var newEntity = archetype.CreateEntity();
 
@@ -108,11 +108,11 @@ public class ArchetypeTests
     [Fact]
     public void TryGetComponentBuffer_NotValid()
     {
-        var world = new World();
+        using var world = new World();
         var entity = world.CreateEntity(13);
         entity.Destroy();
         Assert.False(entity);
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
 
         var newEntity = archetype.CreateEntity();
         Assert.False(newEntity);
@@ -125,9 +125,9 @@ public class ArchetypeTests
     [Fact]
     public void Destroy_Valid()
     {
-        var world = new World();
+        using var world = new World();
         var entity = world.CreateEntity(13);
-        var archetype = entity.archetype;
+        var archetype = entity.Archetype;
         var newEntity = archetype.CreateEntity();
 
         Assert.True(entity);

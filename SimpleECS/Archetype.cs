@@ -8,34 +8,34 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// <summary>
     /// the world this archetype belongs to
     /// </summary>
-    public readonly World world;
+    public readonly int WorldId;
 
     /// <summary>
     /// the index and version create a unique identifier for the archetype
     /// </summary>
-    public readonly int index;
+    public readonly int Index;
 
     /// <summary>
     /// the index and version create a unique identifier for the archetype
     /// </summary>
-    public readonly int version;
+    public readonly int Version;
 
-    internal Archetype(World world, int index, int version)
+    internal Archetype(int worldId, int index, int version)
     {
-        this.world = world;
-        this.index = index;
-        this.version = version;
+        WorldId = worldId;
+        Index = index;
+        Version = version;
     }
 
     /// <summary>
     /// returns a copy of archetype's type signature
     /// </summary>
-    internal TypeSignature GetTypeSignature() => this.TryGetArchetypeInfo(out var archetype_Info) ? new TypeSignature(world.TypeIds, archetype_Info.Signature) : new TypeSignature(world.TypeIds);
+    internal TypeSignature GetTypeSignature() => TryGetArchetypeInfo(out var archetype_Info) ? new TypeSignature(World.All[WorldId].TypeIds, archetype_Info.Signature) : new TypeSignature(World.All[WorldId].TypeIds);
 
     /// <summary>
     /// returns a copy of component types in this archetype
     /// </summary>
-    public Type[] GetTypes() => this.TryGetArchetypeInfo(out var archetype_Info) ? archetype_Info.GetComponentTypes() : Array.Empty<Type>();
+    public Type[] GetTypes() => TryGetArchetypeInfo(out var archetype_Info) ? archetype_Info.GetComponentTypes() : Array.Empty<Type>();
        
 
     /// <summary>
@@ -44,8 +44,8 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// </summary>
     public Entity CreateEntity()
     {
-        if (world != null && this.TryGetArchetypeInfo(out var archetype_info))
-            return world.StructureEvents.CreateEntity(archetype_info);
+        if (World.All[WorldId] != null && TryGetArchetypeInfo(out var archetype_info))
+            return World.All[WorldId].StructureEvents.CreateEntity(archetype_info);
         return default;
     }
 
@@ -55,7 +55,7 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     public Entity[] GetEntities()
     {
         Entity[] entities = new Entity[EntityCount];
-        if (this.TryGetArchetypeInfo(out var archetype_info))
+        if (TryGetArchetypeInfo(out var archetype_info))
             for (int i = 0; i < archetype_info.EntityCount; ++i)
                 entities[i] = archetype_info.Entities[i];
         return entities;
@@ -64,7 +64,7 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// <summary>
     /// returns the total amount of entities stored in the archetype
     /// </summary>
-    public int EntityCount => this.TryGetArchetypeInfo(out var archetype_Info) ? archetype_Info.EntityCount : 0;
+    public int EntityCount => TryGetArchetypeInfo(out var archetype_Info) ? archetype_Info.EntityCount : 0;
 
     /// <summary>
     /// returns false if the archetype is invalid or destroyed.
@@ -74,7 +74,7 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// </summary>
     public bool TryGetEntityBuffer(out Entity[] entity_buffer)
     {
-        if (this.TryGetArchetypeInfo(out var data))
+        if (TryGetArchetypeInfo(out var data))
         {
             entity_buffer = data.Entities;
             return true;
@@ -91,7 +91,7 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// </summary>
     public bool TryGetComponentBuffer<Component>(out Component[] comp_buffer)
     {
-        if (this.TryGetArchetypeInfo(out var data))
+        if (TryGetArchetypeInfo(out var data))
             return data.TryGetArray(out comp_buffer);
         
         comp_buffer = default;
@@ -104,7 +104,7 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// </summary>
     public void Destroy()
     {
-        world?.StructureEvents.DestroyArchetype(this);
+        World.All[WorldId]?.StructureEvents.DestroyArchetype(this);
     }
 
     /// <summary>
@@ -113,38 +113,38 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// </summary>
     public void ResizeBackingArrays()
     {
-        world?.StructureEvents.ResizeBackingArrays(this);
+        World.All[WorldId]?.StructureEvents.ResizeBackingArrays(this);
     }
 
-    bool IEquatable<Archetype>.Equals(Archetype other) => world == other.world && index == other.index && version == other.version;
+    bool IEquatable<Archetype>.Equals(Archetype other) => WorldId == other.WorldId && Index == other.Index && Version == other.Version;
 
     /// <summary>
     /// returns true if the archetype is not null or destroyed
     /// </summary>
-    public bool IsValid() => world != null && world.Archetypes[index].version == version;
+    public bool IsValid() => World.All[WorldId] != null && World.All[WorldId].Archetypes[Index].version == Version;
 
     public static implicit operator bool(Archetype archetype) => archetype.IsValid();
 
-    public override bool Equals(object obj) => obj is Archetype a ? a == this : false;
+    public override bool Equals(object obj) => obj is Archetype a && a == this;
 
-    public static implicit operator int(Archetype a) => a.index;
+    public static implicit operator int(Archetype a) => a.Index;
 
-    public static bool operator ==(Archetype a, Archetype b) => a.world == b.world && a.index == b.index && a.version == b.version;
+    public static bool operator ==(Archetype a, Archetype b) => a.WorldId == b.WorldId && a.Index == b.Index && a.Version == b.Version;
 
     public static bool operator !=(Archetype a, Archetype b) => !(a == b);
 
-    public override int GetHashCode() => index;
+    public override int GetHashCode() => Index;
 
     public override string ToString() => $"{(IsValid() ? "" : "~")}Arch [{GetTypeString()}]";
 
     string GetTypeString()
     {
         string val = "";
-        if (this.TryGetArchetypeInfo(out var archetype_info))
+        if (TryGetArchetypeInfo(out var archetype_info))
         {
             for(int i = 0; i < archetype_info.ComponentCount; ++ i)
             {
-                val += $" {world.TypeIds.Get(archetype_info.ComponentBuffers[i].type_id).Name}";
+                val += $" {World.All[WorldId].TypeIds.Get(archetype_info.ComponentBuffers[i].type_id).Name}";
             }
         }
         return val;
@@ -152,8 +152,8 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
 
     internal bool TryGetArchetypeInfo(out Archetype_Info arch_info)
     {
-        var arch = world?.Archetypes[index];
-        if (arch.HasValue && arch.Value.version == version)
+        var arch = World.All[WorldId]?.Archetypes[Index];
+        if (arch.HasValue && arch.Value.version == Version)
         {
             arch_info = arch.Value.data;
             return true;
@@ -165,14 +165,14 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
 
     IEnumerator<Entity> IEnumerable<Entity>.GetEnumerator()
     {
-        if (this.TryGetArchetypeInfo(out var info))
+        if (TryGetArchetypeInfo(out var info))
             for(int i = 0; i < info.EntityCount; ++ i)
                 yield return info.Entities[i];
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        if (this.TryGetArchetypeInfo(out var info))
+        if (TryGetArchetypeInfo(out var info))
             for(int i = 0; i < info.EntityCount; ++ i)
                 yield return info.Entities[i];
     }
@@ -180,20 +180,20 @@ public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
 
 internal class Archetype_Info
 {
-    public Entity[] Entities = new Entity[8];
-
-    public int EntityCount;
-    public readonly World World;
+    public readonly int WorldId;
     public readonly TypeSignature Signature;
     public readonly Archetype Archetype;
     public readonly int ComponentCount;
+
+    public Entity[] Entities = new Entity[8];
+    public int EntityCount;
     public CompBufferData[] ComponentBuffers { get; }
 
-    public Archetype_Info(World world, TypeSignature signature, int arch_index, int arch_version)
+    public Archetype_Info(int worldId, TypeSignature signature, int arch_index, int arch_version)
     {
-        World = world;
+        WorldId = worldId;
         Signature = signature;
-        Archetype = new Archetype(world, arch_index, arch_version);
+        Archetype = new Archetype(worldId, arch_index, arch_version);
 
         ComponentBuffers = new CompBufferData[signature.Count == 0 ? 1 : signature.Count];
         ComponentCount = signature.Count;
@@ -205,7 +205,7 @@ internal class Archetype_Info
         for (int i = 0; i < ComponentCount; ++i)
         {
             var type = signature.Types[i];
-            var type_id = world.TypeIds.Get(type);
+            var type_id = World.All[WorldId].TypeIds.Get(type);
             var index = type_id % ComponentBuffers.Length;
             ref var buffer_data = ref ComponentBuffers[index];
             if (buffer_data.type_id == 0)
@@ -220,7 +220,7 @@ internal class Archetype_Info
         for (int i = 0; i < ComponentCount; ++i)
         {
             var type = signature.Types[i];
-            var type_id = world.TypeIds.Get(type);
+            var type_id = World.All[WorldId].TypeIds.Get(type);
             if (ContainsType(type_id)) continue;
             var index = GetEmptyIndex(type_id % ComponentBuffers.Length);
             ref var buffer_data = ref ComponentBuffers[index];
@@ -311,7 +311,7 @@ internal class Archetype_Info
 
     public bool TryGetArray<Component>(out Component[] components)
     {
-        int type_id = World.TypeIds.Get<Component>();
+        int type_id = World.All[WorldId].TypeIds.Get<Component>();
         var data = ComponentBuffers[type_id % ComponentBuffers.Length];
         if (data.type_id == type_id)
         {
@@ -345,7 +345,7 @@ internal class Archetype_Info
     {
         Type[] components = new Type[ComponentCount];
         for (int i = 0; i < ComponentCount; ++i)
-            components[i] = World.TypeIds.Get(ComponentBuffers[i].type_id);
+            components[i] = World.All[WorldId].TypeIds.Get(ComponentBuffers[i].type_id);
         return components;
     }
 
