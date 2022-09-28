@@ -69,14 +69,12 @@ public readonly struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// <summary>
     /// returns false if the archetype is invalid or destroyed.
     /// outputs the raw entity storage buffer.
-    /// should be treated as readonly as changing values will break the ecs.
-    /// only entities up to archetype's EntityCount are valid, DO NOT use the length of the array
     /// </summary>
-    public bool TryGetEntityBuffer(out Entity[] entity_buffer)
+    public bool TryGetEntityBuffer(out ReadOnlySpan<Entity> entity_buffer)
     {
         if (TryGetArchetypeInfo(out var data))
         {
-            entity_buffer = data.Entities;
+            entity_buffer = new ReadOnlySpan<Entity>(data.Entities, 0, EntityCount);
             return true;
         }
         entity_buffer = default;
@@ -86,14 +84,16 @@ public readonly struct Archetype : IEquatable<Archetype>, IEnumerable<Entity>
     /// <summary>
     /// returns false if the archetype is invalid or does not store the component buffer
     /// outputs the raw component storage buffer.
-    /// only components up to archetype's EntityCount are valid
     /// entities in the entity buffer that share the same index as the component in the component buffer own that component
     /// </summary>
-    public bool TryGetComponentBuffer<Component>(out Component[] comp_buffer)
+    public bool TryGetComponentBuffer<Component>(out Span<Component> comp_buffer)
     {
-        if (TryGetArchetypeInfo(out var data))
-            return data.TryGetArray(out comp_buffer);
-        
+        if (TryGetArchetypeInfo(out var data) && data.TryGetArray(out Component[] componentArray))
+        {
+            comp_buffer = new Span<Component>(componentArray, 0, EntityCount);
+            return true;
+        }
+
         comp_buffer = default;
         return false;
     }

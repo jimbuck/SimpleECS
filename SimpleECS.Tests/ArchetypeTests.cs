@@ -62,9 +62,9 @@ public class ArchetypeTests
 
         var newEntity = archetype.CreateEntity();
 
-        var didGetEntityBuffer = archetype.TryGetEntityBuffer(out Entity[] entity_buffer);
+        var didGetEntityBuffer = archetype.TryGetEntityBuffer(out var entity_buffer);
         Assert.True(didGetEntityBuffer);
-        Assert.NotEmpty(entity_buffer);
+        Assert.False(entity_buffer.IsEmpty);
         Assert.Equal(entity, entity_buffer[0]);
         Assert.Equal(newEntity, entity_buffer[1]);
     }
@@ -81,9 +81,9 @@ public class ArchetypeTests
         var newEntity = archetype.CreateEntity();
         Assert.False(newEntity);
 
-        var didGetEntityBuffer = archetype.TryGetEntityBuffer(out Entity[] entity_buffer);
+        var didGetEntityBuffer = archetype.TryGetEntityBuffer(out var entity_buffer);
         Assert.False(didGetEntityBuffer);
-        Assert.Null(entity_buffer);
+        Assert.True(entity_buffer.IsEmpty);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class ArchetypeTests
 
         var newEntity = archetype.CreateEntity();
 
-        if (archetype.TryGetComponentBuffer(out int[] int_buffer))
+        if (archetype.TryGetComponentBuffer<int>(out var int_buffer))
         {
             for (int i = 0; i < archetype.EntityCount; ++i)
                 int_buffer[i]++;
@@ -117,9 +117,9 @@ public class ArchetypeTests
         var newEntity = archetype.CreateEntity();
         Assert.False(newEntity);
 
-        var didGetComponentBuffer = archetype.TryGetComponentBuffer(out Entity[] componentBuffer);
+        var didGetComponentBuffer = archetype.TryGetComponentBuffer<Entity>(out var componentBuffer);
         Assert.False(didGetComponentBuffer);
-        Assert.Null(componentBuffer);
+        Assert.True(componentBuffer.IsEmpty);
     }
 
     [Fact]

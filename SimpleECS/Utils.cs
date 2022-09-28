@@ -18,5 +18,5 @@ internal sealed class IdPool
         return freeInt;
     }
 
-    public void Release(int releasedInt) => _ids.Push(releasedInt);
+    public void Recycle(int releasedInt) => _ids.Push(releasedInt);
 }

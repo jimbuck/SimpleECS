@@ -13,7 +13,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
 {
     internal static World[] All = new World[2];
     private static readonly object _lockObject = new();
-    private static IdPool _worldIds = new();
+    private static readonly IdPool _worldIds = new();
 
     internal int WorldId;
 
@@ -161,7 +161,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
         lock (_lockObject)
         {
             All[WorldId] = null;
-            _worldIds.Release(WorldId);
+            _worldIds.Recycle(WorldId);
         }
 
         GC.SuppressFinalize(this);

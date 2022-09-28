@@ -36,6 +36,9 @@ public class QueryTests
 
         query.Foreach((Entity entity, ref int int_val) =>
         {
+            int_val = 4;
+            Assert.Equal(4, int_val);
+
             entity.Remove<int>();
 
             Assert.True(entity.Has<int>());
@@ -63,8 +66,8 @@ public class QueryTests
             Assert.Equal(entity.Archetype, archetype);
             Assert.Equal(1, archetype.EntityCount);
 
-            var didGetEntityBuffer = archetype.TryGetEntityBuffer(out Entity[] entity_buffer);
-            var didGetComponentBuffer = archetype.TryGetComponentBuffer(out int[] int_buffer);
+            var didGetEntityBuffer = archetype.TryGetEntityBuffer(out var entity_buffer);
+            var didGetComponentBuffer = archetype.TryGetComponentBuffer<int>(out var int_buffer);
 
             Assert.True(didGetEntityBuffer);
             Assert.True(didGetComponentBuffer);
