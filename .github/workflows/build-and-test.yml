@@ -25,8 +25,8 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Run Benchmarks
       run: cd SimpleECS.Benchmarks && dotnet run
-    - name: Store benchmark result
-      uses: rhysd/github-action-benchmark@v1
-      with:
-        tool: benchmarkdotnet
-        output-file-path: SimpleECS.Benchmarks/results/SimpleECS.Benchmarks-report-full-compressed.json
+#     - name: Store benchmark result
+#       uses: rhysd/github-action-benchmark@v1
+#       with:
+#         tool: benchmarkdotnet
+#         output-file-path: SimpleECS.Benchmarks/results/SimpleECS.Benchmarks-report-full-compressed.json
