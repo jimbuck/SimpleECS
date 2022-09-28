@@ -23,12 +23,10 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    - name: Continuous Benchmark
-      uses: benchmark-action/github-action-benchmark@v1.14.0
     - name: Run Benchmarks
       run: cd SimpleECS.Benchmarks && dotnet run
     - name: Store benchmark result
       uses: rhysd/github-action-benchmark@v1
       with:
-        tool: 'benchmarkdotnet'
+        tool: benchmarkdotnet
         output-file-path: SimpleECS.Benchmarks/results/SimpleECS.Benchmarks-report-full-compressed.json
