@@ -3,9 +3,12 @@ namespace SimpleECS;
 /// <summary>
 /// Acts as a container of a set of components. Can be filtered by queries to get entities that have speicified components.
 /// </summary>
-public struct Entity : IEquatable<Entity>
+public readonly struct Entity : IEquatable<Entity>
 {
-    internal int WorldId;
+    /// <summary>
+    /// The world this entity belongs to.
+    /// </summary>
+    public readonly int WorldId;
 
     /// <summary>
     /// the combination of the index and version act as a unique identifier for the entity
@@ -32,8 +35,7 @@ public struct Entity : IEquatable<Entity>
         get
         {
             ref var info = ref World.All[WorldId].Entities[Index];
-            if (info.version == Version)
-                return info.ArchInfo.Archetype;
+            if (info.version == Version) return info.ArchInfo.Archetype;
             return default;
         }
     }

@@ -3,10 +3,10 @@ namespace SimpleECS;
 /// <summary>
 /// stores component data of entities that matches the archetype's type signature
 /// </summary>
-public struct Archetype : IEquatable<Archetype>, IEnumerable<Entity> 
+public readonly struct Archetype : IEquatable<Archetype>, IEnumerable<Entity> 
 {
     /// <summary>
-    /// the world this archetype belongs to
+    /// The world this archetype belongs to.
     /// </summary>
     public readonly int WorldId;
 

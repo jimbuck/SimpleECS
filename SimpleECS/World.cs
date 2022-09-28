@@ -62,7 +62,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
 
     public int EntityCount { get; internal set; }
 
-    public World(string name = null)
+    public World(string name = "World")
     {        
         lock (_lockObject)
         {
@@ -72,7 +72,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
             All[WorldId] = this;
         }
 
-        Name = name ?? $"World_{WorldId}";
+        Name = name;
         BufferSignature = new(TypeIds);
 
         // this is just to prevent default archetype from being valid
@@ -448,7 +448,7 @@ public partial class World : IEnumerable<Archetype>, IDisposable
         return StructureEvents.EnqueueEvents > 0;
     }
 
-    public override string ToString() => $"{Name} ({ArchetypeCount}a {EntityCount}e)";
+    public override string ToString() => $"{Name} [{WorldId}] ({ArchetypeCount}a {EntityCount}e)";
 
 
     IEnumerator<Archetype> IEnumerable<Archetype>.GetEnumerator()
