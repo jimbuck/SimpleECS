@@ -20,11 +20,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Run Benchmarks
-      run: cd SimpleECS.Benchmarks && dotnet run
+      run: cd SimpleECS.Benchmarks && dotnet run --configuration Release
 #     - name: Store benchmark result
 #       uses: rhysd/github-action-benchmark@v1
 #       with:
